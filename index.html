@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#09090f">
+  <title>디스코드 화면공유 크롱</title>
+
+  <style>
+    :root {
+      --bg: #09090f;
+      --surface: #12121c;
+      --text: #f4f3ff;
+      --muted: #9695ad;
+      --accent: #9b8cff;
+      --border: rgba(255, 255, 255, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background:
+        radial-gradient(
+          ellipse at 50% 0%,
+          rgba(111, 76, 255, 0.14),
+          transparent 48%
+        ),
+        var(--bg);
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Noto Sans KR", sans-serif;
+      min-height: 100vh;
+    }
+
+    /* 상단 네비게이션 */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 7%;
+      background: rgba(9, 9, 15, 0.78);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #a99aff, #6d54db);
+      color: #fff;
+      font-size: 17px;
+      box-shadow: 0 0 24px rgba(142, 113, 255, 0.24);
+    }
+
+    .nav-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 1.5px;
+    }
+
+    /* 메인 타이틀 */
+    .hero {
+      text-align: center;
+      padding: 90px 20px 54px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border: 1px solid rgba(155, 140, 255, 0.25);
+      border-radius: 100px;
+      background: rgba(155, 140, 255, 0.07);
+      color: #c5baff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #a99aff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #a99aff;
+    }
+
+    h1 {
+      font-size: clamp(30px, 5.5vw, 58px);
+      font-weight: 900;
+      letter-spacing: -2.5px;
+      line-height: 1.25;
+      word-break: keep-all;
+    }
+
+    h1 span {
+      background: linear-gradient(
+        100deg,
+        #ffffff 15%,
+        #c3b8ff 55%,
+        #8e79ff 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-description {
+      margin-top: 19px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.9;
+    }
+
+    /* 갤러리 */
+    .gallery-section {
+      width: min(820px, 90%);
+      margin: 0 auto;
+      padding-bottom: 90px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .photo-count {
+      color: #c2b7ff;
+      background: rgba(155, 140, 255, 0.1);
+      border: 1px solid rgba(155, 140, 255, 0.18);
+      padding: 7px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .photo-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: zoom-in;
+      isolation: isolate;
+      transition:
+        border-color 0.3s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+      animation: fadeUp 0.65s ease both;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(155, 140, 255, 0.45);
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.3);
+    }
+
+    .photo-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 120px;
+      object-fit: contain;
+      background: #0d0d15;
+      transition: filter 0.3s ease;
+    }
+
+    .photo-card:hover img {
+      filter: brightness(0.84);
+    }
+
+    .photo-overlay {
+      position: absolute;
+      inset: auto 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 22px 18px;
+      background: linear-gradient(
+        transparent,
+        rgba(0, 0, 0, 0.78)
+      );
+      pointer-events: none;
+    }
+
+    .photo-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 2px 8px #000;
+    }
+
+    .zoom-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 9px;
+      backdrop-filter: blur(8px);
+      font-size: 11px;
+    }
+
+    /* 전체 화면 이미지 */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      background: rgba(0, 0, 0, 0.97);
+      opacity: 0;
+      visibility: hidden;
+      cursor: zoom-out;
+      transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox img {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      cursor: zoom-out;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .lightbox-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(30, 30, 40, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 100px;
+      padding: 10px 16px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+      backdrop-filter: blur(12px);
+    }
+
+    .footer {
+      padding: 26px 20px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: #65647b;
+      font-size: 12px;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        height: 58px;
+        padding: 0 5%;
+      }
+
+      .nav-label {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+      }
+
+      .hero {
+        padding: 70px 18px 40px;
+      }
+
+      h1 {
+        letter-spacing: -1.5px;
+      }
+
+      .hero-description {
+        font-size: 13px;
+      }
+
+      .gallery-section {
+        width: 92%;
+      }
+
+      .gallery {
+        gap: 16px;
+      }
+
+      .photo-card {
+        border-radius: 12px;
+      }
+
+      .photo-overlay {
+        padding: 28px 13px 13px;
+      }
+
+      .lightbox-hint {
+        bottom: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="logo">
+      <div class="logo-icon">K</div>
+      <span>KRONG ARCHIVE</span>
+    </div>
+    <div class="nav-label">DISCORD SCREENSHARE</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="status-dot"></span>
+        PERSONAL GALLERY
+      </div>
+
+      <h1><span>디스코드 화면공유 크롱</span></h1>
+
+      <p class="hero-description">
+        크롱의 이미지 아카이브에 오신 것을 환영합니다.<br>
+        이미지를 클릭해 더 크게 감상해 보세요.
+      </p>
+    </section>
+
+    <section class="gallery-section">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Image Collection</div>
+          <div class="section-subtitle">
+            이미지를 클릭하면 전체 화면으로 전환됩니다.
+          </div>
+        </div>
+        <div class="photo-count" id="photoCount">00 PHOTOS</div>
+      </div>
+
+      <div class="gallery" id="gallery"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © <span id="year"></span> KRONG ARCHIVE. ALL RIGHTS RESERVED.
+  </footer>
+
+  <!-- 전체 화면 이미지 -->
+  <div
+    class="lightbox"
+    id="lightbox"
+    role="button"
+    tabindex="0"
+    aria-label="전체 화면 이미지 닫기"
+    aria-hidden="true"
+  >
+    <img id="lightboxImage" src="" alt="전체 화면 이미지">
+    <div class="lightbox-hint">
+      CLICK ANYWHERE TO CLOSE · ESC
+    </div>
+  </div>
+
+  <script>
+    // images 폴더 안에 있는 사진 파일명을 입력하세요.
+    const images = [
+      "photo1.jpg",
+      "photo2.png",
+      "photo3.webp"
+    ];
+
+    const gallery = document.getElementById("gallery");
+    const photoCount = document.getElementById("photoCount");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    let previousOverflow = "";
+
+    // 이미지 갤러리 생성
+    images.forEach((filename, index) => {
+      const card = document.createElement("article");
+      card.className = "photo-card";
+      card.style.animationDelay = `${Math.min(index * 0.08, 0.5)}s`;
+
+      const img = document.createElement("img");
+      img.src = `images/${filename}`;
+      img.alt = `크롱 이미지 ${index + 1}`;
+      img.loading = index < 2 ? "eager" : "lazy";
+      img.decoding = "async";
+
+      const overlay = document.createElement("div");
+      overlay.className = "photo-overlay";
+
+      const name = document.createElement("span");
+      name.className = "photo-name";
+      name.textContent =
+        `IMAGE ${String(index + 1).padStart(2, "0")}`;
+
+      const zoom = document.createElement("span");
+      zoom.className = "zoom-label";
+      zoom.textContent = "⛶  FULL VIEW";
+
+      overlay.append(name, zoom);
+      card.append(img, overlay);
+
+      // 이미지 로드에 실패하면 해당 카드를 표시하지 않음
+      img.addEventListener("error", () => card.remove());
+
+      // 사진 클릭 → 전체 화면
+      card.addEventListener("click", () => {
+        openLightbox(img);
+      });
+
+      gallery.appendChild(card);
+    });
+
+    photoCount.textContent =
+      `${String(images.length).padStart(2, "0")} PHOTOS`;
+
+    function openLightbox(img) {
+      lightboxImage.src = img.src;
+      lightboxImage.alt = img.alt;
+
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      lightbox.classList.add("active");
+      lightbox.setAttribute("aria-hidden", "false");
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("active");
+      lightbox.setAttribute("aria-hidden", "true");
+      lightboxImage.src = "";
+      document.body.style.overflow = previousOverflow;
+    }
+
+    // 전체 화면 상태에서 한 번 더 클릭하면 닫기
+    lightbox.addEventListener("click", closeLightbox);
+
+    // ESC 키로도 닫을 수 있음
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        lightbox.classList.contains("active")
+      ) {
+        closeLightbox();
+      }
+    });
+  </script>
+</body>
+</html>
